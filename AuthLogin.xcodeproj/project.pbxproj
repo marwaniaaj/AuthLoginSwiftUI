@@ -15,6 +15,7 @@
 		7A3A8E892B1775BE00F97F07 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3A8E882B1775BE00F97F07 /* LoginView.swift */; };
 		7A3A8E8C2B17972A00F97F07 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7A3A8E8B2B17972A00F97F07 /* GoogleService-Info.plist */; };
 		7A3A8E9B2B17979E00F97F07 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7A3A8E9A2B17979E00F97F07 /* FirebaseAuth */; };
+		7A3A8EA62B1799C300F97F07 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3A8EA52B1799C300F97F07 /* AuthManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		7A3A8E862B1775B400F97F07 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		7A3A8E882B1775BE00F97F07 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		7A3A8E8B2B17972A00F97F07 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		7A3A8EA52B1799C300F97F07 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				7A3A8E732B17744200F97F07 /* AuthLoginApp.swift */,
+				7A3A8EA42B1799B300F97F07 /* Model */,
 				7A3A8E8A2B1796F000F97F07 /* Configuration */,
 				7A3A8E812B1774BA00F97F07 /* View */,
 				7A3A8E772B17744600F97F07 /* Assets.xcassets */,
@@ -92,6 +95,14 @@
 				7A3A8E8B2B17972A00F97F07 /* GoogleService-Info.plist */,
 			);
 			path = Configuration;
+			sourceTree = "<group>";
+		};
+		7A3A8EA42B1799B300F97F07 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				7A3A8EA52B1799C300F97F07 /* AuthManager.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -175,6 +186,7 @@
 				7A3A8E762B17744200F97F07 /* ContentView.swift in Sources */,
 				7A3A8E892B1775BE00F97F07 /* LoginView.swift in Sources */,
 				7A3A8E742B17744200F97F07 /* AuthLoginApp.swift in Sources */,
+				7A3A8EA62B1799C300F97F07 /* AuthManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,22 +8,23 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var authManager: AuthManager
     @State private var isLoggedIn = false
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
                 VStack(alignment: .leading) {
-                    if isLoggedIn {
+                    if authManager.isAnonymous {
+                        Text("Sign-in to view data!")
+                            .font(.headline)
+                    }
+                    else {
                         Text("Name placeholder")
                             .font(.headline)
 
                         Text("Email placeholder")
                             .font(.subheadline)
-                    }
-                    else {
-                        Text("Sign-in to view data!")
-                            .font(.headline)
                     }
                 }
                 .padding()
@@ -40,9 +41,9 @@ struct HomeView: View {
                 Spacer()
 
                 Button {
-                    //TODO: Sign in/out
+                    //TODO: Sign out
                 } label: {
-                    Text(isLoggedIn ? "Sign out" : "Sign in")
+                    Text("Sign out")
                         .font(.body.bold())
                         .frame(width: 120, height: 45, alignment: .center)
                         .foregroundStyle(Color(.loginYellow))
@@ -60,4 +61,5 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .environmentObject(AuthManager())
 }

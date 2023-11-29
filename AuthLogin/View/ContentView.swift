@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var isLoggedIn = false
+    @EnvironmentObject var authManager: AuthManager
 
     var body: some View {
         VStack {
             VStack(spacing: 16) {
-                if isLoggedIn {
+                if authManager.isAuthenticatedUser {
                     HomeView()
                 } else {
                     LoginView()
@@ -25,4 +25,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(AuthManager())
 }

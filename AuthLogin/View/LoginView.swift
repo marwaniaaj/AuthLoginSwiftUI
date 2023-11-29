@@ -12,6 +12,8 @@ struct LoginView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
 
+    @EnvironmentObject var authManager: AuthManager
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -43,7 +45,7 @@ struct LoginView: View {
 
                 // MARK: - Anonymous
                 Button {
-                    // TODO: Sign-in Anonymously
+                    signAnonymously()
                 } label: {
                     Text("Skip")
                         .font(.body.bold())
@@ -55,8 +57,19 @@ struct LoginView: View {
             .background(Color(.loginYellow))
         }
     }
+
+    func signAnonymously() {
+        Task {
+            do {
+                let result = try await authManager.signInAnonymously()
+                print("Result: \(result?.user.uid ?? "N/A")")
+            }
+            catch { print("Error: \(error)") }
+        }
+    }
 }
 
 #Preview {
     LoginView()
+        .environmentObject(AuthManager())
 }
