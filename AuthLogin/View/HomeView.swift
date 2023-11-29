@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var authManager: AuthManager
-    @State private var isLoggedIn = false
+    @State private var showLoginSheet = false
 
     var body: some View {
         NavigationStack {
@@ -40,10 +40,16 @@ struct HomeView: View {
                     .padding()
                 Spacer()
 
+                // Show `Sign out` iff user is not anonymous,
+                // otherwise show `Sign-in` to present LoginView() when tapped.
                 Button {
-                    //TODO: Sign out
+                    if authManager.isAnonymous {
+                        showLoginSheet = true
+                    } else {
+                        signOut()
+                    }
                 } label: {
-                    Text("Sign out")
+                    Text(authManager.isAnonymous ? "Sign-in" :"Sign out")
                         .font(.body.bold())
                         .frame(width: 120, height: 45, alignment: .center)
                         .foregroundStyle(Color(.loginYellow))
@@ -55,6 +61,21 @@ struct HomeView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.loginYellow))
             .navigationTitle("Welcome")
+
+            .sheet(isPresented: $showLoginSheet) {
+                LoginView()
+            }
+        }
+    }
+
+    func signOut() {
+        Task {
+            do {
+                try await authManager.signOut()
+            }
+            catch {
+                print("Error: \(error)")
+            }
         }
     }
 }

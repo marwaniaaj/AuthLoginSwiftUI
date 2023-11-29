@@ -44,12 +44,15 @@ struct LoginView: View {
                  */
 
                 // MARK: - Anonymous
-                Button {
-                    signAnonymously()
-                } label: {
-                    Text("Skip")
-                        .font(.body.bold())
-                        .frame(width: 280, height: 45, alignment: .center)
+                // Hide `Skip` button if user is anonymous.
+                if !authManager.isAnonymous {
+                    Button {
+                        signAnonymously()
+                    } label: {
+                        Text("Skip")
+                            .font(.body.bold())
+                            .frame(width: 280, height: 45, alignment: .center)
+                    }
                 }
             }
             .padding()

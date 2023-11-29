@@ -58,5 +58,34 @@ class AuthManager: ObservableObject {
             throw error
         }
     }
+
+    // MARK: - Sign Out
+    /// Sign out a user from Firebase Provider.
+    func firebaseProviderSignOut(_ user: User) {
+        let providers = user.providerData.map { $0.providerID }.joined(separator: ", ")
+
+        if providers.contains("apple.com")  {
+            // TODO: Sign out from Apple
+        }
+        if providers.contains("google.com") {
+            // TODO: Sign out from Google
+        }
+    }
+
+    /// Sign out current `Firebase` auth user
+    func signOut() async throws {
+        if let user = Auth.auth().currentUser {
+
+            // Sign out current authenticated user in Firebase
+            do {
+                firebaseProviderSignOut(user)
+                try Auth.auth().signOut()
+            }
+            catch let error as NSError {
+                print("FirebaseAuthError: failed to sign out from Firebase, \(error)")
+                throw error
+            }
+        }
+    }
 }
 
