@@ -15,16 +15,16 @@ struct HomeView: View {
         NavigationStack {
             VStack(spacing: 16) {
                 VStack(alignment: .leading) {
-                    if authManager.isAnonymous {
-                        Text("Sign-in to view data!")
-                            .font(.headline)
-                    }
-                    else {
+                    if authManager.isAuthenticatedUser && !authManager.isAnonymous {
                         Text("Name placeholder")
                             .font(.headline)
 
                         Text("Email placeholder")
                             .font(.subheadline)
+                    }
+                    else {
+                        Text("Sign-in to view data!")
+                            .font(.headline)
                     }
                 }
                 .padding()

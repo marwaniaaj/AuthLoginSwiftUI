@@ -16,31 +16,33 @@ class AuthManager: ObservableObject {
     /// Current Firebase auth user.
     @Published var user = Auth.auth().currentUser
 
-    /// Boolean value indicates wether user is anonymous or not
-    @Published var isAnonymous = Auth.auth().currentUser?.isAnonymous ?? false
-
-    /// Boolean value indicates wether user is authenticated or not.
+    /// Boolean value indicates whether user is authenticated or not.
     @Published var isAuthenticatedUser = Auth.auth().currentUser != nil
+
+    /// Boolean value indicates whether user is authenticated anonymously or not
+    @Published var isAnonymous = Auth.auth().currentUser?.isAnonymous ?? false
 
     /// Auth state listener handler
     private var authStateHandle: AuthStateDidChangeListenerHandle!
 
     init() {
-        // Start listening to auth changes upon initialization.
+        // Start listening to auth changes.
         configureAuthStateChanges()
     }
 
     // MARK: - Auth State
-    /// Add listener for changes in the authorization state
+    /// Add listener for changes in the authorization state.
     func configureAuthStateChanges() {
         authStateHandle = Auth.auth().addStateDidChangeListener { auth, user in
+            self.user = user
             self.isAuthenticatedUser = user != nil
             self.isAnonymous = user?.isAnonymous ?? false
             print("Auth changed: \(self.isAuthenticatedUser)")
         }
+
     }
 
-    /// Remove listener for changes in the authorization state
+    /// Remove listener for changes in the authorization state.
     func removeAuthStateListener() {
         Auth.auth().removeStateDidChangeListener(authStateHandle)
     }
