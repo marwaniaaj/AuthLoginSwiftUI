@@ -13,7 +13,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             VStack(spacing: 16) {
-                if authManager.isAuthenticatedUser {
+                if authManager.authState != .signedOut {
                     HomeView()
                 } else {
                     LoginView()

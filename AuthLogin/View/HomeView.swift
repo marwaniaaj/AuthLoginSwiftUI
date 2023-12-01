@@ -15,11 +15,11 @@ struct HomeView: View {
         NavigationStack {
             VStack(spacing: 16) {
                 VStack(alignment: .leading) {
-                    if authManager.isAuthenticatedUser && !authManager.isAnonymous {
-                        Text("Name placeholder")
+                    if authManager.authState == .signedIn {
+                        Text(authManager.user?.displayName ?? "Name placeholder")
                             .font(.headline)
 
-                        Text("Email placeholder")
+                        Text(authManager.user?.email ?? "Email placeholder")
                             .font(.subheadline)
                     }
                     else {
@@ -43,13 +43,13 @@ struct HomeView: View {
                 // Show `Sign out` iff user is not anonymous,
                 // otherwise show `Sign-in` to present LoginView() when tapped.
                 Button {
-                    if authManager.isAnonymous {
+                    if authManager.authState != .signedIn {
                         showLoginSheet = true
                     } else {
                         signOut()
                     }
                 } label: {
-                    Text(authManager.isAnonymous ? "Sign-in" :"Sign out")
+                    Text(authManager.authState != .signedIn ? "Sign-in" :"Sign out")
                         .font(.body.bold())
                         .frame(width: 120, height: 45, alignment: .center)
                         .foregroundStyle(Color(.loginYellow))

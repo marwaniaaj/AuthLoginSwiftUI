@@ -6,6 +6,7 @@
 //
 
 import AuthenticationServices
+import GoogleSignInSwift
 import SwiftUI
 
 struct LoginView: View {
@@ -36,16 +37,14 @@ struct LoginView: View {
                 .frame(width: 280, height: 45, alignment: .center)
 
                 // MARK: - Google
-                /*
                 GoogleSignInButton {
-                    // TODO: Sign-in with Google
+                    signInWithGoogle()
                 }
                 .frame(width: 280, height: 45, alignment: .center)
-                 */
 
                 // MARK: - Anonymous
                 // Hide `Skip` button if user is anonymous.
-                if !authManager.isAnonymous {
+                if authManager.authState == .signedOut {
                     Button {
                         signAnonymously()
                     } label: {
@@ -61,13 +60,42 @@ struct LoginView: View {
         }
     }
 
+    /// Sign in with `Google`, and authenticate with `Firebase`.
+    func signInWithGoogle() {
+        GoogleSignInManager.shared.signInWithGoogle { user, error in
+            if let error = error {
+                print("GoogleSignInError: failed to sign in with Google, \(error))")
+                // Here you can show error message to user.
+                return
+            }
+
+            guard let user = user else { return }
+            Task {
+                do {
+                    let result = try await authManager.googleAuth(user)
+                    if let result = result {
+                        print("GoogleSignInSuccess: \(result.user.uid)")
+                        dismiss()
+                    }
+                }
+                catch {
+                    print("GoogleSignInError: failed to authenticate with Google, \(error))")
+                    // Here you can show error message to user.
+                }
+            }
+        }
+    }
+    
+    /// Sign-in anonymously
     func signAnonymously() {
         Task {
             do {
                 let result = try await authManager.signInAnonymously()
-                print("Result: \(result?.user.uid ?? "N/A")")
+                print("SignInAnonymouslySuccess: \(result?.user.uid ?? "N/A")")
             }
-            catch { print("Error: \(error)") }
+            catch {
+                print("SignInAnonymouslyError: \(error)")
+            }
         }
     }
 }

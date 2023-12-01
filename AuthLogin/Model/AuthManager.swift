@@ -8,19 +8,26 @@
 import AuthenticationServices
 import FirebaseAuth
 import FirebaseCore
+import GoogleSignIn
+
+enum AuthState {
+    // Anonymously authenticated in Firebase.
+    case authenticated
+    // Authenticated in Firebase using one of service providers, and not anonymous.
+    case signedIn
+    // Not authenticated in Firebase.
+    case signedOut
+}
 
 /// An environment singleton responsible for handling
 /// Firebase authentication in app.
 class AuthManager: ObservableObject {
 
     /// Current Firebase auth user.
-    @Published var user = Auth.auth().currentUser
+    @Published var user: User?
 
-    /// Boolean value indicates whether user is authenticated or not.
-    @Published var isAuthenticatedUser = Auth.auth().currentUser != nil
-
-    /// Boolean value indicates whether user is authenticated anonymously or not
-    @Published var isAnonymous = Auth.auth().currentUser?.isAnonymous ?? false
+    /// Auth state for current user.
+    @Published var authState = AuthState.signedOut
 
     /// Auth state listener handler
     private var authStateHandle: AuthStateDidChangeListenerHandle!
@@ -34,24 +41,93 @@ class AuthManager: ObservableObject {
     /// Add listener for changes in the authorization state.
     func configureAuthStateChanges() {
         authStateHandle = Auth.auth().addStateDidChangeListener { auth, user in
-            self.user = user
-            self.isAuthenticatedUser = user != nil
-            self.isAnonymous = user?.isAnonymous ?? false
-            print("Auth changed: \(self.isAuthenticatedUser)")
+            print("Auth changed: \(user != nil)")
+            Task {
+                await self.updateState(user: user)
+            }
         }
-
     }
 
     /// Remove listener for changes in the authorization state.
     func removeAuthStateListener() {
         Auth.auth().removeStateDidChangeListener(authStateHandle)
     }
+    
+    /// Update auth state for given user.
+    /// - Parameter user: `Optional` firebase user.
+    func updateState(user: User?) async {
+        await MainActor.run {
+            self.user = user
+            let isAuthenticatedUser = user != nil
+            let isAnonymous = user?.isAnonymous ?? false
+
+            if isAuthenticatedUser {
+                self.authState = isAnonymous ? .authenticated : .signedIn
+            } else {
+                self.authState = .signedOut
+            }
+        }
+    }
+
+    //MARK: - Authenticate
+    private func authenticateUser(credentials: AuthCredential) async throws -> AuthDataResult? {
+        // If we have authenticated user, then link with given credentials.
+        // Otherwise, sign in using given credentials.
+        if Auth.auth().currentUser != nil {
+            return try await authLink(credentials: credentials)
+        } else {
+            return try await authSignIn(credentials: credentials)
+        }
+    }
+    
+    /// Authenticate with Firebase using Google `idToken`, and `accessToken` from given `GIDGoogleUser`.
+    /// - Parameter user: Signed-in Google user.
+    /// - Returns: Auth data.
+    func googleAuth(_ user: GIDGoogleUser) async throws -> AuthDataResult? {
+        guard let idToken = user.idToken?.tokenString else { return nil }
+
+        let credentials = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
+        do {
+            return try await authenticateUser(credentials: credentials)
+        }
+        catch {
+            print("FirebaseAuthError: googleAuth(user:) failed. \(error)")
+            throw error
+        }
+    }
 
     // MARK: - Sign-in
+
+    private func authSignIn(credentials: AuthCredential) async throws -> AuthDataResult? {
+        do {
+            let result = try await Auth.auth().signIn(with: credentials)
+            await updateState(user: result.user)
+            return result
+        }
+        catch {
+            print("FirebaseAuthError: signIn(with:) failed. \(error)")
+            throw error
+        }
+    }
+    
+    private func authLink(credentials: AuthCredential) async throws -> AuthDataResult? {
+        do {
+            guard let user = Auth.auth().currentUser else { return nil }
+            let result = try await user.link(with: credentials)
+            await updateState(user: result.user)
+            return result
+        }
+        catch {
+            print("FirebaseAuthError: link(with:) failed, \(error)")
+            throw error
+        }
+    }
+
     @discardableResult
     func signInAnonymously() async throws -> AuthDataResult? {
         do {
             let result = try await Auth.auth().signInAnonymously()
+            self.authState = .authenticated
             print("FirebaseAuthSuccess: Sign in anonymously, UID:(\(String(describing: result.user.uid)))")
             return result
         }
@@ -70,7 +146,7 @@ class AuthManager: ObservableObject {
             // TODO: Sign out from Apple
         }
         if providers.contains("google.com") {
-            // TODO: Sign out from Google
+            GoogleSignInManager.shared.signOutFromGoogle()
         }
     }
 
@@ -82,6 +158,7 @@ class AuthManager: ObservableObject {
             do {
                 firebaseProviderSignOut(user)
                 try Auth.auth().signOut()
+                self.authState = .signedOut
             }
             catch let error as NSError {
                 print("FirebaseAuthError: failed to sign out from Firebase, \(error)")
