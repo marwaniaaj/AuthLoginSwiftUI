@@ -27,10 +27,10 @@ struct LoginView: View {
                 // MARK: - Apple
                 SignInWithAppleButton(
                     onRequest: { request in
-                        // TODO: Request Apple Authorization
+                        AppleSignInManager.shared.requestAppleAuthorization(request)
                     },
                     onCompletion: { result in
-                        // TODO: Handle AppleID Completion
+                        handleAppleID(result)
                     }
                 )
                 .signInWithAppleButtonStyle(colorScheme == .light ? .black : .white)
@@ -85,7 +85,35 @@ struct LoginView: View {
             }
         }
     }
-    
+
+    func handleAppleID(_ result: Result<ASAuthorization, Error>) {
+        if case let .success(auth) = result {
+            guard let appleIDCredentials = auth.credential as? ASAuthorizationAppleIDCredential else {
+                print("AppleAuthorization failed: AppleID credential not available")
+                return
+            }
+
+            Task {
+                do {
+                    let result = try await authManager.appleAuth(
+                        appleIDCredentials, 
+                        nonce: AppleSignInManager.nonce
+                    )
+                    if let result = result {
+                        dismiss()
+                    }
+                } catch {
+                    print("AppleAuthorization failed: \(error)")
+                    // Here you can show error message to user.
+                }
+            }
+        } 
+        else if case let .failure(error) = result {
+            print("AppleAuthorization failed: \(error)")
+            // Here you can show error message to user.
+        }
+    }
+
     /// Sign-in anonymously
     func signAnonymously() {
         Task {

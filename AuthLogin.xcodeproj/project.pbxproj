@@ -19,6 +19,7 @@
 		7A3A8EA92B18881B00F97F07 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 7A3A8EA82B18881B00F97F07 /* GoogleSignIn */; };
 		7A3A8EAB2B18881B00F97F07 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7A3A8EAA2B18881B00F97F07 /* GoogleSignInSwift */; };
 		7A3A8EAE2B19C82A00F97F07 /* GoogleSignInManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3A8EAD2B19C82A00F97F07 /* GoogleSignInManager.swift */; };
+		7A3A8EB12B1A0CD500F97F07 /* AppleSignInManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3A8EB02B1A0CD500F97F07 /* AppleSignInManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,8 @@
 		7A3A8EA52B1799C300F97F07 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		7A3A8EAC2B18982B00F97F07 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7A3A8EAD2B19C82A00F97F07 /* GoogleSignInManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignInManager.swift; sourceTree = "<group>"; };
+		7A3A8EAF2B1A069200F97F07 /* AuthLogin.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AuthLogin.entitlements; sourceTree = "<group>"; };
+		7A3A8EB02B1A0CD500F97F07 /* AppleSignInManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +104,7 @@
 			children = (
 				7A3A8EAC2B18982B00F97F07 /* Info.plist */,
 				7A3A8E8B2B17972A00F97F07 /* GoogleService-Info.plist */,
+				7A3A8EAF2B1A069200F97F07 /* AuthLogin.entitlements */,
 			);
 			path = Configuration;
 			sourceTree = "<group>";
@@ -110,6 +114,7 @@
 			children = (
 				7A3A8EA52B1799C300F97F07 /* AuthManager.swift */,
 				7A3A8EAD2B19C82A00F97F07 /* GoogleSignInManager.swift */,
+				7A3A8EB02B1A0CD500F97F07 /* AppleSignInManager.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -194,6 +199,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A3A8EB12B1A0CD500F97F07 /* AppleSignInManager.swift in Sources */,
 				7A3A8E872B1775B400F97F07 /* HomeView.swift in Sources */,
 				7A3A8E762B17744200F97F07 /* ContentView.swift in Sources */,
 				7A3A8EAE2B19C82A00F97F07 /* GoogleSignInManager.swift in Sources */,
@@ -330,6 +336,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AuthLogin/Configuration/AuthLogin.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"AuthLogin/Preview Content\"";
@@ -362,6 +369,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AuthLogin/Configuration/AuthLogin.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"AuthLogin/Preview Content\"";

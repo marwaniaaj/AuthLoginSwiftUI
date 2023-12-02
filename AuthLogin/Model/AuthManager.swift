@@ -96,6 +96,39 @@ class AuthManager: ObservableObject {
         }
     }
 
+    
+    func appleAuth(
+        _ appleIDCredential: ASAuthorizationAppleIDCredential,
+        nonce: String?
+    ) async throws -> AuthDataResult? {
+        guard let nonce = nonce else {
+            fatalError("Invalid state: A login callback was received, but no login request was sent.")
+        }
+
+        guard let appleIDToken = appleIDCredential.identityToken else {
+            print("Unable to fetch identity token")
+            return nil
+        }
+
+        guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+            print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
+            return nil
+        }
+
+        // Initialize a Firebase credential, including the user's full name.
+        let credentials = OAuthProvider.appleCredential(withIDToken: idTokenString,
+                                                       rawNonce: nonce,
+                                                       fullName: appleIDCredential.fullName)
+
+        do {
+            return try await authenticateUser(credentials: credentials)
+        }
+        catch {
+            print("FirebaseAuthError: appleAuth(appleIDCredential:nonce:) failed. \(error)")
+            throw error
+        }
+    }
+
     // MARK: - Sign-in
 
     private func authSignIn(credentials: AuthCredential) async throws -> AuthDataResult? {
@@ -140,7 +173,8 @@ class AuthManager: ObservableObject {
     // MARK: - Sign Out
     /// Sign out a user from Firebase Provider.
     func firebaseProviderSignOut(_ user: User) {
-        let providers = user.providerData.map { $0.providerID }.joined(separator: ", ")
+        let providers = user.providerData
+            .map { $0.providerID }.joined(separator: ", ")
 
         if providers.contains("apple.com")  {
             // TODO: Sign out from Apple
