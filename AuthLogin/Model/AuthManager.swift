@@ -32,6 +32,13 @@ class AuthManager: ObservableObject {
     /// Auth state listener handler
     private var authStateHandle: AuthStateDidChangeListenerHandle!
 
+    /// Common auth link errors.
+    private let authLinkErrors: [AuthErrorCode.Code] = [
+            .emailAlreadyInUse,
+            .credentialAlreadyInUse,
+            .providerAlreadyLinked
+    ]
+
     init() {
         // Start listening to auth changes.
         configureAuthStateChanges()
@@ -152,6 +159,19 @@ class AuthManager: ObservableObject {
         }
         catch {
             print("FirebaseAuthError: link(with:) failed, \(error)")
+            if let error = error as NSError? {
+                if let code = AuthErrorCode.Code(rawValue: error.code), 
+                    authLinkErrors.contains(code) {
+
+                    // If provider is "apple.com", get updated AppleID credentials from the error object.
+                    let appleCredentials =
+                        credentials.provider == "apple.com"
+                        ? error.userInfo[AuthErrorUserInfoUpdatedCredentialKey] as? AuthCredential
+                        : nil
+
+                    return try await self.authSignIn(credentials: appleCredentials ?? credentials)
+                }
+            }
             throw error
         }
     }
