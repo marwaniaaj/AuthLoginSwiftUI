@@ -43,6 +43,9 @@ class AuthManager: ObservableObject {
     init() {
         // Start listening to auth changes.
         configureAuthStateChanges()
+        
+        // Check AppleID credentials
+        verifySignInWithAppleID()
     }
 
     // MARK: - Auth State
@@ -52,6 +55,31 @@ class AuthManager: ObservableObject {
             print("Auth changed: \(user != nil)")
             Task {
                 await self.updateState(user: user)
+            }
+        }
+    }
+
+    func verifySignInWithAppleID() {
+        let appleIDProvider = ASAuthorizationAppleIDProvider()
+        let providerData = Auth.auth().currentUser?.providerData
+
+        if let appleProviderData = providerData?.first(where: { $0.providerID == "apple.com" }) {
+            Task {
+                let credentialState = try await appleIDProvider.credentialState(forUserID: appleProviderData.uid)
+                switch credentialState {
+                case .authorized:
+                    break // The Apple ID credential is valid.
+                case .revoked, .notFound:
+                    // The Apple ID credential is either revoked or was not found, so show the sign-in UI.
+                    do {
+                        try await self.signOut()
+                    }
+                    catch {
+                        print("FirebaseAuthError: signOut() failed. \(error)")
+                    }
+                default:
+                    break
+                }
             }
         }
     }
