@@ -30,6 +30,8 @@ class AuthManager: ObservableObject {
     /// Auth state for current user.
     @Published var authState = AuthState.signedOut
 
+    private var displayName: String?
+
     /// Auth state listener handler
     private var authStateHandle: AuthStateDidChangeListenerHandle!
 
@@ -122,6 +124,9 @@ class AuthManager: ObservableObject {
     func googleAuth(_ user: GIDGoogleUser) async throws -> AuthDataResult? {
         guard let idToken = user.idToken?.tokenString else { return nil }
 
+        // Save user's name, in case we need to update displayName after link(with:)
+        displayName = user.profile?.name
+
         let credentials = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
         do {
             return try await authenticateUser(credentials: credentials)
@@ -150,6 +155,9 @@ class AuthManager: ObservableObject {
             print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
             return nil
         }
+
+        // Save user's name, in case we need to update displayName after link(with:)
+        displayName = appleIDCredential.fullName?.formatted()
 
         // Initialize a Firebase credential, including the user's full name.
         let credentials = OAuthProvider.appleCredential(withIDToken: idTokenString,
@@ -183,7 +191,10 @@ class AuthManager: ObservableObject {
         do {
             guard let user = Auth.auth().currentUser else { return nil }
             let result = try await user.link(with: credentials)
+
+            await updateDisplayName(for: result.user)
             await updateState(user: result.user)
+
             return result
         }
         catch {
@@ -202,6 +213,24 @@ class AuthManager: ObservableObject {
                 }
             }
             throw error
+        }
+    }
+    
+    /// Check if user's displayName is null or empty,
+    /// then update using previously saved displayName
+    /// - Parameter user: Firebase auth user.
+    private func updateDisplayName(for user: User) async {
+        if let currentDisplayName = Auth.auth().currentUser?.displayName, !currentDisplayName.isEmpty {
+            // current user is non-empty, don't overwrite it
+        } else  {
+            let changeRequest = user.createProfileChangeRequest()
+            changeRequest.displayName = displayName
+            do {
+                try await changeRequest.commitChanges()
+            }
+            catch {
+                print("FirebaseAuthError: Failed to update the user's displayName. \(error.localizedDescription)")
+            }
         }
     }
 
