@@ -183,7 +183,10 @@ class AuthManager: ObservableObject {
         do {
             guard let user = Auth.auth().currentUser else { return nil }
             let result = try await user.link(with: credentials)
+
+            await updateDisplayName(for: result.user)
             await updateState(user: result.user)
+
             return result
         }
         catch {
@@ -202,6 +205,25 @@ class AuthManager: ObservableObject {
                 }
             }
             throw error
+        }
+    }
+
+    /// Check if user's displayName is null or empty,
+    /// then update using displayName from dataProvider.
+    /// - Parameter user: Firebase auth user.
+    private func updateDisplayName(for user: User) async {
+        if let currentDisplayName = Auth.auth().currentUser?.displayName, !currentDisplayName.isEmpty {
+            // current user is non-empty, don't overwrite it
+        } else  {
+            let displayName = user.providerData.first?.displayName
+            let changeRequest = user.createProfileChangeRequest()
+            changeRequest.displayName = displayName
+            do {
+                try await changeRequest.commitChanges()
+            }
+            catch {
+                print("FirebaseAuthError: Failed to update the user's displayName. \(error.localizedDescription)")
+            }
         }
     }
 
