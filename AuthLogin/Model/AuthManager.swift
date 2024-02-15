@@ -53,9 +53,7 @@ class AuthManager: ObservableObject {
     func configureAuthStateChanges() {
         authStateHandle = Auth.auth().addStateDidChangeListener { auth, user in
             print("Auth changed: \(user != nil)")
-            Task {
-                await self.updateState(user: user)
-            }
+            self.updateState(user: user)
         }
     }
 
@@ -91,17 +89,15 @@ class AuthManager: ObservableObject {
     
     /// Update auth state for given user.
     /// - Parameter user: `Optional` firebase user.
-    func updateState(user: User?) async {
-        await MainActor.run {
-            self.user = user
-            let isAuthenticatedUser = user != nil
-            let isAnonymous = user?.isAnonymous ?? false
+    func updateState(user: User?) {
+        self.user = user
+        let isAuthenticatedUser = user != nil
+        let isAnonymous = user?.isAnonymous ?? false
 
-            if isAuthenticatedUser {
-                self.authState = isAnonymous ? .authenticated : .signedIn
-            } else {
-                self.authState = .signedOut
-            }
+        if isAuthenticatedUser {
+            self.authState = isAnonymous ? .authenticated : .signedIn
+        } else {
+            self.authState = .signedOut
         }
     }
 
@@ -170,7 +166,7 @@ class AuthManager: ObservableObject {
     private func authSignIn(credentials: AuthCredential) async throws -> AuthDataResult? {
         do {
             let result = try await Auth.auth().signIn(with: credentials)
-            await updateState(user: result.user)
+            updateState(user: result.user)
             return result
         }
         catch {
@@ -185,7 +181,7 @@ class AuthManager: ObservableObject {
             let result = try await user.link(with: credentials)
 
             await updateDisplayName(for: result.user)
-            await updateState(user: result.user)
+            updateState(user: result.user)
 
             return result
         }
