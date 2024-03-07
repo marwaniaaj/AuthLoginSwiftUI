@@ -38,7 +38,9 @@ struct LoginView: View {
 
                 // MARK: - Google
                 GoogleSignInButton {
-                    signInWithGoogle()
+                    Task {
+                        await signInWithGoogle()
+                    }
                 }
                 .frame(width: 280, height: 45, alignment: .center)
 
@@ -61,28 +63,20 @@ struct LoginView: View {
     }
 
     /// Sign in with `Google`, and authenticate with `Firebase`.
-    func signInWithGoogle() {
-        GoogleSignInManager.shared.signInWithGoogle { user, error in
-            if let error = error {
-                print("GoogleSignInError: failed to sign in with Google, \(error))")
-                // Here you can show error message to user.
-                return
-            }
+    func signInWithGoogle() async {
+        do {
+            guard let user = try await GoogleSignInManager.shared.signInWithGoogle() else { return }
 
-            guard let user = user else { return }
-            Task {
-                do {
-                    let result = try await authManager.googleAuth(user)
-                    if let result = result {
-                        print("GoogleSignInSuccess: \(result.user.uid)")
-                        dismiss()
-                    }
-                }
-                catch {
-                    print("GoogleSignInError: failed to authenticate with Google, \(error))")
-                    // Here you can show error message to user.
-                }
+            let result = try await authManager.googleAuth(user)
+            if let result = result {
+                print("GoogleSignInSuccess: \(result.user.uid)")
+                dismiss()
             }
+        }
+        catch {
+            print("GoogleSignInError: failed to sign in with Google, \(error))")
+            // Here you can show error message to user.
+            return
         }
     }
 

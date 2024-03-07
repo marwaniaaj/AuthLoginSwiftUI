@@ -17,26 +17,23 @@ class GoogleSignInManager {
 
     private init() {}
 
-    /// Sign in with `Google`.
-    /// - Parameter completion: a block which is invoked when the restore/sign-in flow finishes.
-    func signInWithGoogle(_ completion: @escaping GoogleAuthResult) {
+    @MainActor
+    /// /// Sign in with `Google`.
+    /// - Returns: Optional `GIDGoogleUser`.
+    func signInWithGoogle() async throws -> GIDGoogleUser? {
         // Check previous sign-in.
         if GIDSignIn.sharedInstance.hasPreviousSignIn() {
-            GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
-                completion(user, error)
-            }
+            return try await GIDSignIn.sharedInstance.restorePreviousSignIn()
         } else {
             // Accessing rootViewController through shared instance of UIApplication.
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
-            guard let rootViewController = windowScene.windows.first?.rootViewController else { return }
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return nil }
+            guard let rootViewController = windowScene.windows.first?.rootViewController else { return nil }
 
-            // Start sign-in flow
-            GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { result, error in
-                completion(result?.user, error)
-            }
+            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+            return result.user
         }
     }
-    
+
     /// Sign out from `Google`.
     func signOutFromGoogle() {
         GIDSignIn.sharedInstance.signOut()
