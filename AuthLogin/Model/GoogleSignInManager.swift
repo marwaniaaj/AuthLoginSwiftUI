@@ -18,20 +18,32 @@ class GoogleSignInManager {
     private init() {}
 
     @MainActor
-    /// /// Sign in with `Google`.
+    /// Sign in with `Google`.
     /// - Returns: Optional `GIDGoogleUser`.
     func signInWithGoogle() async throws -> GIDGoogleUser? {
         // Check previous sign-in.
         if GIDSignIn.sharedInstance.hasPreviousSignIn() {
-            return try await GIDSignIn.sharedInstance.restorePreviousSignIn()
+            do {
+                try await GIDSignIn.sharedInstance.restorePreviousSignIn()
+                return try await GIDSignIn.sharedInstance.currentUser?.refreshTokensIfNeeded()
+            }
+            catch {
+                // Previous sign in available, but was previously revoked, so initiate sign in flow.
+                return try await googleSignInFlow()
+            }
         } else {
-            // Accessing rootViewController through shared instance of UIApplication.
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return nil }
-            guard let rootViewController = windowScene.windows.first?.rootViewController else { return nil }
-
-            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
-            return result.user
+            return try await googleSignInFlow()
         }
+    }
+
+    @MainActor
+    private func googleSignInFlow() async throws -> GIDGoogleUser? {
+        // Accessing rootViewController through shared instance of UIApplication.
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return nil }
+        guard let rootViewController = windowScene.windows.first?.rootViewController else { return nil }
+
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+        return result.user
     }
 
     /// Sign out from `Google`.

@@ -20,6 +20,7 @@
 		7A3A8EAB2B18881B00F97F07 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7A3A8EAA2B18881B00F97F07 /* GoogleSignInSwift */; };
 		7A3A8EAE2B19C82A00F97F07 /* GoogleSignInManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3A8EAD2B19C82A00F97F07 /* GoogleSignInManager.swift */; };
 		7A3A8EB12B1A0CD500F97F07 /* AppleSignInManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3A8EB02B1A0CD500F97F07 /* AppleSignInManager.swift */; };
+		7ADA9E912B9B08D80051B77D /* AuthManager-DeleteAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ADA9E902B9B08D80051B77D /* AuthManager-DeleteAccount.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		7A3A8EAD2B19C82A00F97F07 /* GoogleSignInManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignInManager.swift; sourceTree = "<group>"; };
 		7A3A8EAF2B1A069200F97F07 /* AuthLogin.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AuthLogin.entitlements; sourceTree = "<group>"; };
 		7A3A8EB02B1A0CD500F97F07 /* AppleSignInManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInManager.swift; sourceTree = "<group>"; };
+		7ADA9E902B9B08D80051B77D /* AuthManager-DeleteAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthManager-DeleteAccount.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				7A3A8EA52B1799C300F97F07 /* AuthManager.swift */,
+				7ADA9E902B9B08D80051B77D /* AuthManager-DeleteAccount.swift */,
 				7A3A8EAD2B19C82A00F97F07 /* GoogleSignInManager.swift */,
 				7A3A8EB02B1A0CD500F97F07 /* AppleSignInManager.swift */,
 			);
@@ -203,6 +206,7 @@
 				7A3A8E872B1775B400F97F07 /* HomeView.swift in Sources */,
 				7A3A8E762B17744200F97F07 /* ContentView.swift in Sources */,
 				7A3A8EAE2B19C82A00F97F07 /* GoogleSignInManager.swift in Sources */,
+				7ADA9E912B9B08D80051B77D /* AuthManager-DeleteAccount.swift in Sources */,
 				7A3A8E892B1775BE00F97F07 /* LoginView.swift in Sources */,
 				7A3A8E742B17744200F97F07 /* AuthLoginApp.swift in Sources */,
 				7A3A8EA62B1799C300F97F07 /* AuthManager.swift in Sources */,

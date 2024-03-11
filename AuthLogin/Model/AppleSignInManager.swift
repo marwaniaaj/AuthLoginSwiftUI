@@ -10,8 +10,8 @@ import CryptoKit
 
 /// An environment singleton responsible for
 /// logging and authorization of Apple's sign-in flow in our app.
-class AppleSignInManager {
-    
+class AppleSignInManager: NSObject {
+
     /// AppleSignInManager shared instance.
     static let shared = AppleSignInManager()
 
@@ -23,16 +23,38 @@ class AppleSignInManager {
         currentNonce ?? nil
     }
 
-    private init() {}
+    private var continuation : CheckedContinuation<ASAuthorizationAppleIDCredential, Error>?
+
+    func requestAppleAuthorization() async throws -> ASAuthorizationAppleIDCredential {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.continuation = continuation
+
+            let appleIdProvider = ASAuthorizationAppleIDProvider()
+            let request = appleIdProvider.createRequest()
+            requestAppleAuthorization(request)
+
+            let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+            authorizationController.delegate = self
+            authorizationController.performRequests()
+        }
+    }
 
     func requestAppleAuthorization(_ request: ASAuthorizationAppleIDRequest) {
         AppleSignInManager.currentNonce = randomNonceString()
         request.requestedScopes = [.fullName, .email]
         request.nonce = sha256(AppleSignInManager.currentNonce!)
     }
+}
 
-    func signOut() {
-        // TODO: Revoke Apple ID
+extension AppleSignInManager: ASAuthorizationControllerDelegate {
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        if case let appleIDCredential as ASAuthorizationAppleIDCredential = authorization.credential {
+            continuation?.resume(returning: appleIDCredential)
+        }
+    }
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        continuation?.resume(throwing: error)
     }
 }
 

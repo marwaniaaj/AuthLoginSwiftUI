@@ -43,9 +43,11 @@ class AuthManager: ObservableObject {
     init() {
         // Start listening to auth changes.
         configureAuthStateChanges()
-        
-        // Check AppleID credentials
-        verifySignInWithAppleID()
+
+        // Verify AppleID and Google credentials
+        Task {
+            await verifySignInProvider()
+        }
     }
 
     // MARK: - Auth State
@@ -54,30 +56,21 @@ class AuthManager: ObservableObject {
         authStateHandle = Auth.auth().addStateDidChangeListener { auth, user in
             print("Auth changed: \(user != nil)")
             self.updateState(user: user)
-        }
-    }
 
-    func verifySignInWithAppleID() {
-        let appleIDProvider = ASAuthorizationAppleIDProvider()
-        let providerData = Auth.auth().currentUser?.providerData
-
-        if let appleProviderData = providerData?.first(where: { $0.providerID == "apple.com" }) {
-            Task {
-                let credentialState = try await appleIDProvider.credentialState(forUserID: appleProviderData.uid)
-                switch credentialState {
-                case .authorized:
-                    break // The Apple ID credential is valid.
-                case .revoked, .notFound:
-                    // The Apple ID credential is either revoked or was not found, so show the sign-in UI.
-                    do {
-                        try await self.signOut()
-                    }
-                    catch {
-                        print("FirebaseAuthError: signOut() failed. \(error)")
-                    }
-                default:
-                    break
+            if let user {
+                /*
+                do {
+                    try await firestore.getUserDocument(user)
                 }
+                catch FirestoreErrors.DocumentDoesNotExist {
+                    print("User Document Does Not Exist!")
+                    await verifyAuthTokenResult()
+                    return
+                }
+                catch {
+                    // Other errors
+                }
+                 */
             }
         }
     }
@@ -86,10 +79,10 @@ class AuthManager: ObservableObject {
     func removeAuthStateListener() {
         Auth.auth().removeStateDidChangeListener(authStateHandle)
     }
-    
+
     /// Update auth state for given user.
     /// - Parameter user: `Optional` firebase user.
-    func updateState(user: User?) {
+    internal func updateState(user: User?) {
         self.user = user
         let isAuthenticatedUser = user != nil
         let isAnonymous = user?.isAnonymous ?? false
@@ -98,6 +91,82 @@ class AuthManager: ObservableObject {
             self.authState = isAnonymous ? .authenticated : .signedIn
         } else {
             self.authState = .signedOut
+        }
+    }
+
+    // MARK: - Verify authentication
+
+    /// Verify sign in providers, whether or not they have been revoked.
+    private func verifySignInProvider() async {
+        guard let providerData = Auth.auth().currentUser?.providerData else { return }
+        var isAppleCredentialRevoked = false
+        var isGoogleCredentialRevoked = false
+
+        if providerData.contains(where: { $0.providerID == "apple.com" }) {
+            isAppleCredentialRevoked = await !verifySignInWithAppleID()
+        }
+
+        if providerData.contains(where: { $0.providerID == "google.com" }) {
+            isGoogleCredentialRevoked = await !verifyGoogleSignIn()
+        }
+
+        if isAppleCredentialRevoked && isGoogleCredentialRevoked {
+            /// Sign out iff user not signed out, or signed in anonymously.
+            if authState != .signedIn {
+                do {
+                    try await self.signOut()
+                }
+                catch {
+                    print("FirebaseAuthError: verifySignInProvider() failed. \(error)")
+                }
+            }
+        }
+    }
+
+    /// Verify AppleID provider.
+    /// - Returns: Boolean indicates whether user is authorized, or authorization has been revoked
+    private func verifySignInWithAppleID() async -> Bool {
+        let appleIDProvider = ASAuthorizationAppleIDProvider()
+
+        guard let providerData = Auth.auth().currentUser?.providerData,
+              let appleProviderData = providerData.first(where: { $0.providerID == "apple.com" }) else {
+            return false
+        }
+
+        do {
+            let credentialState = try await appleIDProvider.credentialState(forUserID: appleProviderData.uid)
+            return credentialState != .revoked && credentialState != .notFound
+        }
+        catch {
+            return false
+        }
+    }
+
+    /// Verify Google provider.
+    /// - Returns: Boolean indicates whether user is authorized, or authorization has been revoked
+    private func verifyGoogleSignIn() async -> Bool {
+        guard let providerData = Auth.auth().currentUser?.providerData,
+              providerData.contains(where: { $0.providerID == "google.com" }) else { return false }
+
+        do {
+            try await GIDSignIn.sharedInstance.restorePreviousSignIn()
+            return true
+        }
+        catch {
+            return false // The Google sign in credential is either revoked or was not found.
+        }
+    }
+
+    /// Validate and force refresh Auth token
+    /// - Returns: Boolean indicates if token is valid or not.
+    private func verifyAuthTokenResult() async -> Bool {
+        do {
+            try await Auth.auth().currentUser?.getIDTokenResult(forcingRefresh: true)
+            return true
+        }
+        catch {
+            print("Error retrieving id token result. \(error)")
+            return false
         }
     }
 
