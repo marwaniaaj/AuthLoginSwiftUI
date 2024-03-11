@@ -13,14 +13,15 @@ It supports authentication using passwords, phone numbers, popular federated ide
 
 
 ### Medium Articles:
-[Firebase Authentication in SwiftUI: Part 1 (Anonymous)](https://medium.com/@marwa.diab/firebase-authentication-in-swiftui-part-1-71a409108d9f)
+[Firebase Authentication in SwiftUI: Part 1 - Anonymous](https://medium.com/@marwa.diab/firebase-authentication-in-swiftui-part-1-71a409108d9f)
 
-[Firebase Authentication in SwiftUI: Part 2 (Google)](https://medium.com/@marwa.diab/firebase-authentication-in-swiftui-part-2-fdd6ad6608f7)
+[Firebase Authentication in SwiftUI: Part 2 - Google Sign In](https://medium.com/@marwa.diab/firebase-authentication-in-swiftui-part-2-fdd6ad6608f7)
 
-[Firebase Authentication in SwiftUI: Part 3 (Apple)](https://medium.com/@marwa.diab/firebase-authentication-in-swiftui-part-3-80be99dbc63d)
+[Firebase Authentication in SwiftUI: Part 3 - Sign in with Apple](https://medium.com/@marwa.diab/firebase-authentication-in-swiftui-part-3-80be99dbc63d)
 
-[Firebase Authentication in SwiftUI: Part 4 (Handling Auth Errors)](https://medium.com/@marwa.diab/firebase-authentication-in-swiftui-part-4-d771a0a30c4c)
+[Firebase Authentication in SwiftUI: Part 4 - Handling Auth Errors](https://medium.com/@marwa.diab/firebase-authentication-in-swiftui-part-4-d771a0a30c4c)
 
+[Firebase Authentication in SwiftUI: Part 5 - Deleting User Account & Revoke Access Token](https://medium.com/@marwa.diab/deleting-user-account-revoke-access-token-0e30d7a351bb)
 
 ## Build and Install
 
